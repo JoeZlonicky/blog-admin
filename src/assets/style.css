@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  @apply bg-secondary text-primary-text;
+}
+
+h1 {
+  @apply text-4xl;
+}
+
+input,
+textarea {
+  @apply p-1 text-input-text;
+}
+
+button {
+  @apply bg-input-bg px-4 py-2 font-bold;
+}
+
+button:hover:not(:active) {
+  @apply bg-input-bg-highlight;
+}
+
+input[type='checkbox'] {
+  @apply h-4 w-4 accent-input-bg;
+}

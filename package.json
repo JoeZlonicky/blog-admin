@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "type-check": "vue-tsc --build --force",
-    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint --ext=.vue,.js,.ts src/ --fix",
+    "lint": "eslint . --fix",
     "format": "prettier public src index.html --write"
   },
   "dependencies": {
