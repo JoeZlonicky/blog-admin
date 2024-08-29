@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getPosts } from '@/api/getPosts';
 import { logIn } from '@/api/logIn';
 import { ref } from 'vue';
 
@@ -8,9 +9,9 @@ const errorMessage = ref<string | null>(null);
 
 async function onSubmitForm() {
   try {
-    const jwt = await logIn(username.value as string, password.value as string);
-    console.log(jwt);
+    await logIn(username.value as string, password.value as string);
     errorMessage.value = null;
+    await getPosts();
   } catch (err) {
     errorMessage.value = 'Log-in failed';
   }
