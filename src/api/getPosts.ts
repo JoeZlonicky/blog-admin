@@ -1,17 +1,11 @@
 import { api } from './api';
+import { authHeaders } from './authHeaders';
 import { parsePostDates } from './parsePostDates';
 import type { Post } from '@/types/Post';
 
-async function getPosts(): Promise<Post[]> {
-  const jwt = localStorage.getItem('jwt');
-  if (!jwt) {
-    throw new Error();
-  }
-
-  const res = await api.get('/posts?published=all', {
-    headers: { Authorization: `Bearer ${jwt}` },
-  });
-  const posts: Post[] = res.data.results;
+async function getPosts(authToken: string) {
+  const res = await api.get('/posts', authHeaders(authToken));
+  const posts: Post[] = res.data;
   posts.forEach((post) => {
     parsePostDates(post);
   });

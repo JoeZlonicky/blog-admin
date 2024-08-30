@@ -1,4 +1,4 @@
-import LogInView from './views/LogInView.vue';
+import HomeView from './views/HomeView.vue';
 import PageNotFoundView from './views/PageNotFoundView.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 
@@ -7,8 +7,8 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'log-in',
-      component: LogInView,
+      name: 'home',
+      component: HomeView,
     },
     {
       path: '/:pathMatch(.*)*',
