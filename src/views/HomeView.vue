@@ -8,7 +8,7 @@ import { RouterLink } from 'vue-router';
 
 const posts = ref<Post[]>([]);
 const authStore = useAuthStore();
-const { token: authToken } = storeToRefs(authStore);
+const { token: authToken, authorName } = storeToRefs(authStore);
 
 async function refreshPosts() {
   authStore.callWithAuthentication(async () => {
@@ -25,7 +25,9 @@ watch(authToken, async () => {
 
 <template>
   <main class="px-8 py-4">
-    <p class="mb-4 mt-2 text-2xl">Welcome, First Last!</p>
+    <p v-if="authorName" class="mb-4 mt-2 text-2xl">
+      Welcome, {{ authorName }}!
+    </p>
     <RouterLink to="/new-post" custom #="{ navigate }"
       ><button class="mb-4" @click="navigate">New Post</button></RouterLink
     >

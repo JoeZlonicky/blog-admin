@@ -38,7 +38,7 @@ async function onSubmitForm() {
     class="bg-dim-backdrop fixed inset-0"
   >
     <form
-      class="mx-auto mt-16 flex max-w-md flex-col items-center gap-4 bg-primary p-8"
+      class="mx-auto mt-16 flex max-w-md flex-col items-center gap-4 border-2 border-accent bg-primary p-8"
       @submit.prevent="onSubmitForm"
     >
       <h1 class="text-center font-bold text-accent">Log In</h1>

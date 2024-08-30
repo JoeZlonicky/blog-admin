@@ -1,13 +1,27 @@
 import { getAuthToken } from '@/api/getAuthToken';
+import type { AuthorPayload } from '@/types/AuthorPayload';
 import axios, { AxiosError } from 'axios';
+import { jwtDecode } from 'jwt-decode';
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 const LOCAL_STORAGE_KEY = 'auth';
 
 const useAuthStore = defineStore('auth', () => {
   const token = ref('');
   const needsAuthentication = ref(true);
+
+  const authorName = computed(() => {
+    if (!token.value) {
+      return '';
+    }
+
+    const decoded = jwtDecode<AuthorPayload>(token.value);
+    if (decoded.firstName && decoded.lastName) {
+      return `${decoded.firstName} ${decoded.lastName}`;
+    }
+    return '';
+  });
 
   async function attemptLogIn(username: string, password: string) {
     try {
@@ -60,6 +74,7 @@ const useAuthStore = defineStore('auth', () => {
 
   return {
     token,
+    authorName,
     needsAuthentication,
     attemptLogIn,
     logOut,
