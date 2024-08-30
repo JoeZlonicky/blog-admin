@@ -10,9 +10,14 @@ const authStore = useAuthStore();
 const { token: authToken } = storeToRefs(authStore);
 
 async function refreshPosts() {
-  authStore.callWithAuthentication(async () => {
-    posts.value = await getPosts(authToken.value);
-  });
+  authStore.callWithAuthentication(
+    async () => {
+      posts.value = await getPosts(authToken.value);
+    },
+    () => {
+      posts.value = [];
+    },
+  );
 }
 
 refreshPosts();

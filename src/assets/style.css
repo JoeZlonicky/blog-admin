@@ -6,14 +6,6 @@
   @apply bg-secondary text-primary-text;
 }
 
-dialog {
-  @apply text-primary-text;
-}
-
-dialog::backdrop {
-  background-color: #00000050;
-}
-
 h1 {
   @apply text-4xl;
 }

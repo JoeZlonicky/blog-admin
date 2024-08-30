@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/useAuthStore';
 import { storeToRefs } from 'pinia';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 
 const username = defineModel<string>('username');
 const password = defineModel<string>('password');
@@ -10,7 +10,7 @@ const errorMessage = ref<string | null>(null);
 const authStore = useAuthStore();
 const { needsAuthentication } = storeToRefs(authStore);
 
-const dialog = ref<HTMLDialogElement | null>(null);
+const dialog = ref<HTMLElement | null>(null);
 
 async function onSubmitForm() {
   try {
@@ -20,30 +20,25 @@ async function onSubmitForm() {
     );
     errorMessage.value = null;
     needsAuthentication.value = false;
-    dialog.value?.close();
   } catch (err) {
     if (err instanceof Error) {
       errorMessage.value = err.message;
     } else {
       errorMessage.value = 'Unknown error';
     }
+  } finally {
+    password.value = '';
   }
 }
-
-watch(
-  needsAuthentication,
-  () => {
-    if (needsAuthentication.value && dialog.value !== null) {
-      dialog.value.showModal();
-    }
-  },
-  { immediate: true },
-);
 </script>
 <template>
-  <dialog ref="dialog" class="mx-auto mt-24 w-full max-w-md bg-primary p-8">
+  <div
+    v-show="needsAuthentication"
+    ref="dialog"
+    class="bg-dim-backdrop fixed inset-0"
+  >
     <form
-      class="flex flex-col items-center gap-4"
+      class="mx-auto mt-16 flex max-w-md flex-col items-center gap-4 bg-primary p-8"
       @submit.prevent="onSubmitForm"
     >
       <h1 class="text-center font-bold text-accent">Log In</h1>
@@ -60,7 +55,7 @@ watch(
       <p v-if="errorMessage" class="font-bold">{{ errorMessage }}</p>
       <button class="mx-auto mt-2 block" type="submit">Log In</button>
     </form>
-  </dialog>
+  </div>
 </template>
 
 <style scoped></style>

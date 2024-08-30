@@ -10,6 +10,7 @@ export default {
       'input-text': '#000000',
       'input-bg': '#087d5d',
       'input-bg-highlight': '#19bf69',
+      'dim-backdrop': '#00000050',
     },
   },
   plugins: [],

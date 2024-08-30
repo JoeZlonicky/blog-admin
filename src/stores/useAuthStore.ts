@@ -7,7 +7,7 @@ const LOCAL_STORAGE_KEY = 'auth';
 
 const useAuthStore = defineStore('auth', () => {
   const token = ref('');
-  const needsAuthentication = ref(false);
+  const needsAuthentication = ref(true);
 
   async function attemptLogIn(username: string, password: string) {
     try {
@@ -23,24 +23,34 @@ const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function checkLocalStorage() {
+  async function logOut() {
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+    token.value = '';
+    needsAuthentication.value = true;
+  }
+
+  function checkLocalStorage() {
     const savedToken = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (savedToken) {
       token.value = savedToken;
+      needsAuthentication.value = false;
     }
   }
 
-  async function callWithAuthentication(f: () => void) {
+  async function callWithAuthentication(
+    f: () => Promise<void>,
+    noAuthCb?: () => void,
+  ) {
     if (!token.value) {
-      console.log('No token yet...');
+      noAuthCb?.();
       needsAuthentication.value = true;
       return;
     }
     try {
-      f();
+      await f();
     } catch (err) {
+      noAuthCb?.();
       if (err instanceof AxiosError && err.status === 401) {
-        console.log('Needs a new token...');
         needsAuthentication.value = true;
       } else {
         throw err;
@@ -52,6 +62,7 @@ const useAuthStore = defineStore('auth', () => {
     token,
     needsAuthentication,
     attemptLogIn,
+    logOut,
     checkLocalStorage,
     callWithAuthentication,
   };
