@@ -23,6 +23,18 @@ const useAuthStore = defineStore('auth', () => {
     return '';
   });
 
+  const authorId = computed(() => {
+    if (!token.value) {
+      return '';
+    }
+
+    const decoded = jwtDecode<AuthorPayload>(token.value);
+    if (decoded.id) {
+      return decoded.id;
+    }
+    return '';
+  });
+
   async function attemptLogIn(username: string, password: string) {
     try {
       token.value = await getAuthToken(username, password);
@@ -74,6 +86,7 @@ const useAuthStore = defineStore('auth', () => {
 
   return {
     token,
+    authorId,
     authorName,
     needsAuthentication,
     attemptLogIn,

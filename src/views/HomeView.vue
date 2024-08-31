@@ -1,18 +1,31 @@
 <script setup lang="ts">
+import { createPost } from '@/api/createPost';
 import { getPosts } from '@/api/getPosts';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { Post } from '@/types/Post';
 import { storeToRefs } from 'pinia';
 import { ref, watch } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 
+const router = useRouter();
 const posts = ref<Post[]>([]);
 const authStore = useAuthStore();
-const { token: authToken, authorName } = storeToRefs(authStore);
+const { token: authToken, authorId, authorName } = storeToRefs(authStore);
 
 async function refreshPosts() {
   authStore.callWithAuthentication(async () => {
     posts.value = await getPosts(authToken.value);
+  });
+}
+
+async function createNewPost() {
+  authStore.callWithAuthentication(async () => {
+    try {
+      const newPost = await createPost(authToken.value, authorId.value);
+      router.push(`/edit-post/${newPost.id}`);
+    } catch (err) {
+      console.log(err);
+    }
   });
 }
 
@@ -28,9 +41,7 @@ watch(authToken, async () => {
     <p v-if="authorName" class="mb-4 mt-2 text-2xl">
       Welcome, {{ authorName }}!
     </p>
-    <RouterLink to="/new-post" custom #="{ navigate }"
-      ><button class="mb-4" @click="navigate">New Post</button></RouterLink
-    >
+    <button class="mb-4" @click="createNewPost">New Post</button>
 
     <h1 class="mb-2 text-accent">Posts</h1>
     <table class="block w-full border-collapse overflow-x-auto">
@@ -43,19 +54,26 @@ watch(authToken, async () => {
         </tr>
       </thead>
       <tbody>
-        <tr
+        <RouterLink
           v-for="post in posts"
           :key="post.id"
-          class="cursor-pointer hover:bg-primary"
-          title="Open"
+          :to="`post/${post.id.toString()}?new`"
+          custom
+          #="{ navigate }"
         >
-          <td>{{ post.title }}</td>
-          <td>{{ post.author.firstName }} {{ post.author.lastName }}</td>
-          <td>{{ post.published ? 'Yes' : '' }}</td>
-          <td title="(Approved / Total)">
-            {{ post.comments.length }} / {{ post.comments.length }}
-          </td>
-        </tr>
+          <tr
+            class="cursor-pointer hover:bg-primary"
+            title="Open"
+            @click="navigate"
+          >
+            <td>{{ post.title }}</td>
+            <td>{{ post.author.firstName }} {{ post.author.lastName }}</td>
+            <td>{{ post.published ? 'Yes' : '' }}</td>
+            <td title="(Approved / Total)">
+              {{ post.comments.length }} / {{ post.comments.length }}
+            </td>
+          </tr>
+        </RouterLink>
       </tbody>
     </table>
   </main>
