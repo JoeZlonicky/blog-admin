@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { deletePost } from '@/api/deletePost';
 import { getPost } from '@/api/getPost';
+import { updatePostPublished } from '@/api/updatePostPublished';
 import PostComment from '@/components/PostComment.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { Post } from '@/types/Post';
@@ -35,9 +36,26 @@ async function deletePostAndReturnHome() {
   authStore.callWithAuthentication(async (authToken) => {
     if (!post.value) return;
     try {
-      await deletePost(authToken, post.value.id.toString());
+      await deletePost(authToken, post.value.id);
       router.push(`/`);
     } catch (err) {
+      return;
+    }
+  });
+}
+
+async function setPostPublished(isPublished: boolean) {
+  authStore.callWithAuthentication(async (authToken) => {
+    if (!post.value) return;
+    try {
+      console.log('Setting published...');
+      post.value = await updatePostPublished(
+        authToken,
+        post.value.id,
+        isPublished,
+      );
+    } catch (err) {
+      console.error(err);
       return;
     }
   });
@@ -78,8 +96,10 @@ watch(
       <span class="mx-auto mb-4 flex w-fit gap-2">
         <button @click="deletePostAndReturnHome">Delete</button>
         <button @click="editPost">Edit</button>
-        <button v-if="post.publishedAt">Unpublish</button>
-        <button v-else>Publish</button>
+        <button v-if="post.publishedAt" @click="() => setPostPublished(false)">
+          Unpublish
+        </button>
+        <button v-else @click="() => setPostPublished(true)">Publish</button>
       </span>
 
       <h2 class="mb-4 text-center text-3xl">Comments</h2>

@@ -3,7 +3,7 @@ import { authHeaders } from './authHeaders';
 import { parsePostDates } from './parsePostDates';
 import type { Post } from '@/types/Post';
 
-async function getAuthorsPosts(authToken: string, authorId: string) {
+async function getAuthorsPosts(authToken: string, authorId: number) {
   const res = await api.get(
     `/posts?authorId=${authorId}`,
     authHeaders(authToken),
