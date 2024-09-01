@@ -5,9 +5,10 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import type { Post } from '@/types/Post';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
+const router = useRouter();
 
 const post = ref<Post | undefined>(undefined);
 const authStore = useAuthStore();
@@ -29,6 +30,12 @@ async function updatePost() {
       isFetching.value = false;
     }
   });
+}
+
+function edit() {
+  if (post.value) {
+    router.push(`/edit-post/${post.value.id}`);
+  }
 }
 
 onMounted(async () => updatePost());
@@ -57,6 +64,13 @@ watch(
     </main>
 
     <template v-if="post">
+      <span class="mx-auto mb-4 flex w-fit gap-2">
+        <button>Delete</button>
+        <button @click="edit">Edit</button>
+        <button v-if="post.published">Unpublish</button>
+        <button v-else>Publish</button>
+      </span>
+
       <h2 class="mb-4 text-center text-3xl">Comments</h2>
       <p v-if="post.comments.length === 0" class="text-center">
         No comments so far!

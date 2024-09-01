@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { createPost } from '@/api/createPost';
-import { getPosts } from '@/api/getPosts';
+import { getAuthorsPosts } from '@/api/getAuthorsPosts';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { Post } from '@/types/Post';
 import { storeToRefs } from 'pinia';
@@ -14,7 +14,7 @@ const { token: authToken, authorId, authorName } = storeToRefs(authStore);
 
 async function refreshPosts() {
   authStore.callWithAuthentication(async () => {
-    posts.value = await getPosts(authToken.value);
+    posts.value = await getAuthorsPosts(authToken.value, authorId.value);
   });
 }
 
@@ -43,13 +43,12 @@ watch(authToken, async () => {
     </p>
     <button class="mb-4" @click="createNewPost">New Post</button>
 
-    <h1 class="mb-2 text-accent">Posts</h1>
+    <h1 class="mb-2 text-accent">Your Posts</h1>
     <table class="block w-full border-collapse overflow-x-auto">
       <thead>
         <tr>
           <th>Title</th>
-          <th>Author</th>
-          <th>Published?</th>
+          <th>Published</th>
           <th title="(Approved / Total)">#&nbsp;Comments</th>
         </tr>
       </thead>
@@ -57,7 +56,7 @@ watch(authToken, async () => {
         <RouterLink
           v-for="post in posts"
           :key="post.id"
-          :to="`post/${post.id.toString()}?new`"
+          :to="`post/${post.id.toString()}`"
           custom
           #="{ navigate }"
         >
@@ -67,7 +66,6 @@ watch(authToken, async () => {
             @click="navigate"
           >
             <td>{{ post.title }}</td>
-            <td>{{ post.author.firstName }} {{ post.author.lastName }}</td>
             <td>{{ post.published ? 'Yes' : '' }}</td>
             <td title="(Approved / Total)">
               {{ post.comments.length }} / {{ post.comments.length }}

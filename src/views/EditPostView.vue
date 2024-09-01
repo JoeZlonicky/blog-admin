@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { getPost } from '@/api/getPost';
-import PostComment from '@/components/PostComment.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { Post } from '@/types/Post';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
+const router = useRouter();
 
 const post = ref<Post | undefined>(undefined);
+const currentTitle = defineModel<string>('currentTitle');
 const currentContent = defineModel<string>('currentContent');
 
 const authStore = useAuthStore();
@@ -24,9 +25,8 @@ async function updatePost() {
     try {
       isFetching.value = true;
       post.value = await getPost(authToken.value, postId);
-      if (post.value.content) {
-        currentContent.value = post.value.content;
-      }
+      currentTitle.value = post.value.title;
+      currentContent.value = post.value.content;
       didLastFetchSucceed.value = true;
     } catch (err) {
       didLastFetchSucceed.value = false;
@@ -34,6 +34,19 @@ async function updatePost() {
       isFetching.value = false;
     }
   });
+}
+
+function discard() {
+  if (post.value) {
+    currentTitle.value = post.value.title;
+    currentContent.value = post.value.content;
+  }
+}
+
+function save() {
+  if (post.value) {
+    router.push(`/post/${post.value.id}`);
+  }
 }
 
 onMounted(async () => updatePost());
@@ -45,20 +58,22 @@ watch(
 </script>
 
 <template>
-  <div class="mx-auto max-w-4xl px-4">
-    <main
-      class="my-8 flex min-h-32 flex-col items-center bg-primary px-4 pt-0 shadow-md"
-    >
-      <p v-if="isFetching" class="my-auto">Loading post...</p>
-      <p v-else-if="!didLastFetchSucceed" class="my-auto">
-        Failed to load post.
-      </p>
-      <template v-else-if="post">
-        <input class="mt-8 capitalize" :value="post?.title" />
-        <div class="mb-8 mt-2 max-w-3xl whitespace-pre-wrap text-left text-lg">
-          <textarea v-model="currentContent"></textarea>
-        </div>
-      </template>
-    </main>
+  <div class="px-8 py-4">
+    <p v-if="isFetching" class="my-auto">Loading post...</p>
+    <p v-else-if="!didLastFetchSucceed" class="my-auto">Failed to load post.</p>
+    <template v-else-if="post">
+      <h1 class>Edit Post</h1>
+
+      <label class="block">Title:</label>
+      <input v-model="currentTitle" class="capitalize" />
+      <div class="mb-8 mt-2 max-w-3xl whitespace-pre-wrap text-left text-lg">
+        <textarea v-model="currentContent"></textarea>
+      </div>
+
+      <span class="mx-auto mb-4 flex w-fit gap-2">
+        <button @click="discard">Discard Changes</button>
+        <button @click="save">Save Changes</button>
+      </span>
+    </template>
   </div>
 </template>
