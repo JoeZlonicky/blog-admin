@@ -4,8 +4,8 @@ type Comment = {
   lastInitial: string;
   content: string;
 
+  approvedAt: Date;
   createdAt: Date;
-  updatedAt: Date;
 
   postId: number;
 };

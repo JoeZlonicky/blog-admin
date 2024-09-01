@@ -3,6 +3,7 @@ import { createPost } from '@/api/createPost';
 import { getAuthorsPosts } from '@/api/getAuthorsPosts';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { Post } from '@/types/Post';
+import { format } from 'date-fns';
 import { storeToRefs } from 'pinia';
 import { ref, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
@@ -27,6 +28,10 @@ async function createNewPost() {
       console.log(err);
     }
   });
+}
+
+function formatPublishedAt(date: Date): string {
+  return format(date, 'MMM. do, yyyy');
 }
 
 refreshPosts();
@@ -66,9 +71,12 @@ watch(authToken, async () => {
             @click="navigate"
           >
             <td>{{ post.title }}</td>
-            <td>{{ post.published ? 'Yes' : '' }}</td>
+            <td>
+              {{ post.publishedAt && formatPublishedAt(post.publishedAt) }}
+            </td>
             <td title="(Approved / Total)">
-              {{ post.comments.length }} / {{ post.comments.length }}
+              {{ post.comments.filter((comment) => comment.approvedAt).length }}
+              / {{ post.comments.length }}
             </td>
           </tr>
         </RouterLink>

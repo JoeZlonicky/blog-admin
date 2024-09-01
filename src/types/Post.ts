@@ -1,4 +1,3 @@
-import type { Author } from './Author';
 import type { Comment } from './Comment';
 
 type Post = {
@@ -6,14 +5,12 @@ type Post = {
   title: string;
   content?: string;
 
-  published: boolean;
+  publishedAt: Date;
   createdAt: Date;
-  updatedAt: Date;
 
   comments: Comment[];
 
   authorId: number;
-  author: Author;
 };
 
 export type { Post };
