@@ -11,18 +11,18 @@ import { RouterLink, useRouter } from 'vue-router';
 const router = useRouter();
 const posts = ref<Post[]>([]);
 const authStore = useAuthStore();
-const { token: authToken, authorId, authorName } = storeToRefs(authStore);
+const { authorId, authorName } = storeToRefs(authStore);
 
 async function refreshPosts() {
-  authStore.callWithAuthentication(async () => {
-    posts.value = await getAuthorsPosts(authToken.value, authorId.value);
+  authStore.callWithAuthentication(async (authToken) => {
+    posts.value = await getAuthorsPosts(authToken, authorId.value);
   });
 }
 
 async function createNewPost() {
-  authStore.callWithAuthentication(async () => {
+  authStore.callWithAuthentication(async (authToken) => {
     try {
-      const newPost = await createPost(authToken.value, authorId.value);
+      const newPost = await createPost(authToken, authorId.value);
       router.push(`/edit-post/${newPost.id}`);
     } catch (err) {
       console.log(err);
@@ -36,7 +36,7 @@ function formatPublishedAt(date: Date): string {
 
 refreshPosts();
 
-watch(authToken, async () => {
+watch(authorId, async () => {
   refreshPosts();
 });
 </script>

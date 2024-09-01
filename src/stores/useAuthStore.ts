@@ -64,7 +64,7 @@ const useAuthStore = defineStore('auth', () => {
   }
 
   async function callWithAuthentication(
-    f: () => Promise<void>,
+    f: (authToken: string) => Promise<void>,
     noAuthCb?: () => void,
   ) {
     if (!token.value) {
@@ -73,7 +73,7 @@ const useAuthStore = defineStore('auth', () => {
       return;
     }
     try {
-      await f();
+      await f(token.value);
     } catch (err) {
       noAuthCb?.();
       if (err instanceof AxiosError && err.status === 401) {

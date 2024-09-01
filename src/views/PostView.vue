@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import { deletePost } from '@/api/deletePost';
 import { getPost } from '@/api/getPost';
 import PostComment from '@/components/PostComment.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { Post } from '@/types/Post';
-import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -12,17 +12,16 @@ const router = useRouter();
 
 const post = ref<Post | undefined>(undefined);
 const authStore = useAuthStore();
-const { token: authToken } = storeToRefs(authStore);
 
 const isFetching = ref(false);
 const didLastFetchSucceed = ref(false);
 
 async function updatePost() {
   const postId = parseInt(route.params.postId as string);
-  authStore.callWithAuthentication(async () => {
+  authStore.callWithAuthentication(async (authToken) => {
     try {
       isFetching.value = true;
-      post.value = await getPost(authToken.value, postId);
+      post.value = await getPost(authToken, postId);
       didLastFetchSucceed.value = true;
     } catch (err) {
       didLastFetchSucceed.value = false;
@@ -32,7 +31,19 @@ async function updatePost() {
   });
 }
 
-function edit() {
+async function deletePostAndReturnHome() {
+  authStore.callWithAuthentication(async (authToken) => {
+    if (!post.value) return;
+    try {
+      await deletePost(authToken, post.value.id.toString());
+      router.push(`/`);
+    } catch (err) {
+      return;
+    }
+  });
+}
+
+function editPost() {
   if (post.value) {
     router.push(`/edit-post/${post.value.id}`);
   }
@@ -65,9 +76,9 @@ watch(
 
     <template v-if="post">
       <span class="mx-auto mb-4 flex w-fit gap-2">
-        <button>Delete</button>
-        <button @click="edit">Edit</button>
-        <button v-if="post.published">Unpublish</button>
+        <button @click="deletePostAndReturnHome">Delete</button>
+        <button @click="editPost">Edit</button>
+        <button v-if="post.publishedAt">Unpublish</button>
         <button v-else>Publish</button>
       </span>
 

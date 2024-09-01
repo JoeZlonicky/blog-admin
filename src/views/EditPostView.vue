@@ -2,7 +2,6 @@
 import { getPost } from '@/api/getPost';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { Post } from '@/types/Post';
-import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -14,17 +13,16 @@ const currentTitle = defineModel<string>('currentTitle');
 const currentContent = defineModel<string>('currentContent');
 
 const authStore = useAuthStore();
-const { token: authToken } = storeToRefs(authStore);
 
 const isFetching = ref(false);
 const didLastFetchSucceed = ref(false);
 
 async function updatePost() {
   const postId = parseInt(route.params.postId as string);
-  authStore.callWithAuthentication(async () => {
+  authStore.callWithAuthentication(async (authToken) => {
     try {
       isFetching.value = true;
-      post.value = await getPost(authToken.value, postId);
+      post.value = await getPost(authToken, postId);
       currentTitle.value = post.value.title;
       currentContent.value = post.value.content;
       didLastFetchSucceed.value = true;
