@@ -37,6 +37,12 @@ async function updatePost() {
 }
 
 function discard() {
+  const confirm = window.confirm(
+    'Are you sure you would like to discard your changes?',
+  );
+  if (!confirm) {
+    return;
+  }
   if (post.value) {
     router.push(`/post/${post.value.id}`);
   }
@@ -73,15 +79,16 @@ watch(
     <p v-if="isFetching" class="my-auto">Loading post...</p>
     <p v-else-if="!didLastFetchSucceed" class="my-auto">Failed to load post.</p>
     <template v-else-if="post">
-      <h1 class>Edit Post</h1>
+      <h1 class="mb-4 text-accent">Edit Post</h1>
 
-      <label class="block">Title:</label>
+      <label class="block text-xl">Title:</label>
       <input v-model="currentTitle" class="capitalize" />
       <div class="mb-8 mt-2 max-w-3xl whitespace-pre-wrap text-left text-lg">
-        <textarea v-model="currentContent"></textarea>
+        <label class="block text-xl">Content:</label>
+        <textarea v-model="currentContent" class="w-full resize"></textarea>
       </div>
 
-      <span class="mx-auto mb-4 flex w-fit gap-2">
+      <span class="mb-4 flex w-fit gap-2">
         <button @click="discard">Discard Changes</button>
         <APICallButton :api-call="save">Save Changes</APICallButton>
       </span>

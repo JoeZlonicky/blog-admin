@@ -2,13 +2,16 @@
 import APICallButton from './APICallButton.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { storeToRefs } from 'pinia';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const authStore = useAuthStore();
 const { needsAuthentication } = storeToRefs(authStore);
 
 async function logOut() {
   await authStore.logOut();
-  window.location.href = '/'; // Force refresh even if on home page
+  router.push('/');
 }
 </script>
 <template>

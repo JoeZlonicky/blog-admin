@@ -15,8 +15,13 @@ const authStore = useAuthStore();
 const { authorId, authorName } = storeToRefs(authStore);
 
 async function refreshPosts() {
+  posts.value = [];
   await authStore.callWithAuthentication(async (authToken) => {
-    posts.value = await getAuthorsPosts(authToken, authorId.value);
+    try {
+      posts.value = await getAuthorsPosts(authToken, authorId.value);
+    } catch (err) {
+      return;
+    }
   });
 }
 
