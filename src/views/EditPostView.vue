@@ -13,6 +13,7 @@ const router = useRouter();
 const post = ref<Post | undefined>(undefined);
 const currentTitle = defineModel<string>('currentTitle');
 const currentContent = defineModel<string>('currentContent');
+const currentContextTextArea = ref<HTMLTextAreaElement | null>(null);
 
 const authStore = useAuthStore();
 
@@ -21,19 +22,20 @@ const didLastFetchSucceed = ref(false);
 
 async function updatePost() {
   const postId = parseInt(route.params.postId as string);
-  await authStore.callWithAuthentication(async (authToken) => {
-    try {
-      isFetching.value = true;
+  isFetching.value = true;
+  try {
+    await authStore.callWithAuthentication(async (authToken) => {
       post.value = await getPost(authToken, postId);
       currentTitle.value = post.value.title;
       currentContent.value = post.value.content;
+
       didLastFetchSucceed.value = true;
-    } catch (err) {
-      didLastFetchSucceed.value = false;
-    } finally {
-      isFetching.value = false;
-    }
-  });
+    });
+  } catch (err) {
+    didLastFetchSucceed.value = false;
+  } finally {
+    isFetching.value = false;
+  }
 }
 
 function discard() {
@@ -49,28 +51,44 @@ function discard() {
 }
 
 async function save() {
-  await authStore.callWithAuthentication(async (authToken) => {
-    if (
-      post.value &&
-      currentTitle.value &&
-      currentContent.value !== undefined
-    ) {
-      await updatePostTitleAndContent(
-        authToken,
-        post.value.id,
-        currentTitle.value,
-        currentContent.value,
-      );
-      router.push(`/post/${post.value.id}`);
-    }
-  });
+  try {
+    await authStore.callWithAuthentication(async (authToken) => {
+      if (
+        post.value &&
+        currentTitle.value &&
+        currentContent.value !== undefined
+      ) {
+        await updatePostTitleAndContent(
+          authToken,
+          post.value.id,
+          currentTitle.value,
+          currentContent.value,
+        );
+        router.push(`/post/${post.value.id}`);
+      }
+    });
+  } catch (err) {
+    return;
+  }
 }
 
-onMounted(async () => updatePost());
+function updateTextAreaHeight() {
+  if (currentContextTextArea.value) {
+    currentContextTextArea.value.style.height = `${currentContextTextArea.value.scrollHeight}px`;
+  }
+}
+
+onMounted(async () => {
+  await updatePost();
+  updateTextAreaHeight();
+});
 
 watch(
   () => route.params.postId,
-  async () => updatePost(),
+  async () => {
+    await updatePost();
+    updateTextAreaHeight();
+  },
 );
 </script>
 
@@ -83,13 +101,17 @@ watch(
 
       <label class="block text-xl">Title:</label>
       <input v-model="currentTitle" class="capitalize" />
-      <div class="mb-8 mt-2 max-w-3xl whitespace-pre-wrap text-left text-lg">
+      <div class="mb-8 mt-2 max-w-3xl text-left text-lg">
         <label class="block text-xl">Content:</label>
-        <textarea v-model="currentContent" class="w-full resize"></textarea>
+        <textarea
+          ref="currentContextTextArea"
+          v-model="currentContent"
+          class="w-full resize whitespace-pre-wrap"
+        ></textarea>
       </div>
 
       <span class="mb-4 flex w-fit gap-2">
-        <button @click="discard">Discard Changes</button>
+        <button class="negative" @click="discard">Discard Changes</button>
         <APICallButton :api-call="save">Save Changes</APICallButton>
       </span>
     </template>

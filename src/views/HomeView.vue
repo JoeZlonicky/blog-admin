@@ -16,24 +16,24 @@ const { authorId, authorName } = storeToRefs(authStore);
 
 async function refreshPosts() {
   posts.value = [];
-  await authStore.callWithAuthentication(async (authToken) => {
-    try {
+  try {
+    await authStore.callWithAuthentication(async (authToken) => {
       posts.value = await getAuthorsPosts(authToken, authorId.value);
-    } catch (err) {
-      return;
-    }
-  });
+    });
+  } catch (err) {
+    return;
+  }
 }
 
 async function createNewPost() {
-  await authStore.callWithAuthentication(async (authToken) => {
-    try {
+  try {
+    await authStore.callWithAuthentication(async (authToken) => {
       const newPost = await createPost(authToken, authorId.value);
       router.push(`/edit-post/${newPost.id}`);
-    } catch (err) {
-      return;
-    }
-  });
+    });
+  } catch (err) {
+    return;
+  }
 }
 
 function formatPublishedAt(date: Date): string {

@@ -19,8 +19,16 @@ button {
   @apply bg-input-bg px-4 py-2 font-bold;
 }
 
+button.negative {
+  @apply bg-negative-input-bg;
+}
+
 button:hover:not(:active):not(:disabled) {
   @apply bg-input-bg-highlight;
+}
+
+button.negative:hover:not(:active):not(:disabled) {
+  @apply bg-negative-input-bg-highlight;
 }
 
 button:disabled {
