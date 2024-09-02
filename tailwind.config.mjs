@@ -11,6 +11,7 @@ export default {
       'input-bg': '#087d5d',
       'input-bg-highlight': '#19bf69',
       'dim-backdrop': '#000000B0',
+      disabled: '#757575',
     },
   },
   plugins: [],

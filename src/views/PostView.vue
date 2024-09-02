@@ -2,6 +2,7 @@
 import { deletePost } from '@/api/deletePost';
 import { getPost } from '@/api/getPost';
 import { updatePostPublished } from '@/api/updatePostPublished';
+import APICallButton from '@/components/APICallButton.vue';
 import PostComment from '@/components/PostComment.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { Post } from '@/types/Post';
@@ -19,7 +20,7 @@ const didLastFetchSucceed = ref(false);
 
 async function updatePost() {
   const postId = parseInt(route.params.postId as string);
-  authStore.callWithAuthentication(async (authToken) => {
+  await authStore.callWithAuthentication(async (authToken) => {
     try {
       isFetching.value = true;
       post.value = await getPost(authToken, postId);
@@ -33,7 +34,14 @@ async function updatePost() {
 }
 
 async function deletePostAndReturnHome() {
-  authStore.callWithAuthentication(async (authToken) => {
+  const confirm = window.confirm(
+    'Are you sure you would like to delete this post?',
+  );
+  if (!confirm) {
+    return;
+  }
+
+  await authStore.callWithAuthentication(async (authToken) => {
     if (!post.value) return;
     try {
       await deletePost(authToken, post.value.id);
@@ -45,7 +53,7 @@ async function deletePostAndReturnHome() {
 }
 
 async function setPostPublished(isPublished: boolean) {
-  authStore.callWithAuthentication(async (authToken) => {
+  await authStore.callWithAuthentication(async (authToken) => {
     if (!post.value) return;
     try {
       console.log('Setting published...');
@@ -59,6 +67,26 @@ async function setPostPublished(isPublished: boolean) {
       return;
     }
   });
+}
+
+async function publish() {
+  const confirm = window.confirm(
+    'Are you sure you would like to publish this post?',
+  );
+  if (!confirm) {
+    return;
+  }
+  await setPostPublished(true);
+}
+
+async function unpublish() {
+  const confirm = window.confirm(
+    'Are you sure you would like to unpublish this post?',
+  );
+  if (!confirm) {
+    return;
+  }
+  await setPostPublished(false);
 }
 
 function editPost() {
@@ -94,12 +122,14 @@ watch(
 
     <template v-if="post">
       <span class="mx-auto mb-4 flex w-fit gap-2">
-        <button @click="deletePostAndReturnHome">Delete</button>
+        <APICallButton :api-call="deletePostAndReturnHome"
+          >Delete</APICallButton
+        >
         <button @click="editPost">Edit</button>
-        <button v-if="post.publishedAt" @click="() => setPostPublished(false)">
+        <APICallButton v-if="post.publishedAt" :api-call="unpublish">
           Unpublish
-        </button>
-        <button v-else @click="() => setPostPublished(true)">Publish</button>
+        </APICallButton>
+        <APICallButton v-else :api-call="publish">Publish</APICallButton>
       </span>
 
       <h2 class="mb-4 text-center text-3xl">Comments</h2>

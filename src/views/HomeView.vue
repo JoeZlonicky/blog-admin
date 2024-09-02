@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { createPost } from '@/api/createPost';
 import { getAuthorsPosts } from '@/api/getAuthorsPosts';
+import APICallButton from '@/components/APICallButton.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { Post } from '@/types/Post';
 import { format } from 'date-fns';
@@ -14,18 +15,18 @@ const authStore = useAuthStore();
 const { authorId, authorName } = storeToRefs(authStore);
 
 async function refreshPosts() {
-  authStore.callWithAuthentication(async (authToken) => {
+  await authStore.callWithAuthentication(async (authToken) => {
     posts.value = await getAuthorsPosts(authToken, authorId.value);
   });
 }
 
 async function createNewPost() {
-  authStore.callWithAuthentication(async (authToken) => {
+  await authStore.callWithAuthentication(async (authToken) => {
     try {
       const newPost = await createPost(authToken, authorId.value);
       router.push(`/edit-post/${newPost.id}`);
     } catch (err) {
-      console.log(err);
+      return;
     }
   });
 }
@@ -46,7 +47,9 @@ watch(authorId, async () => {
     <p v-if="authorName" class="mb-4 mt-2 text-2xl">
       Welcome, {{ authorName }}!
     </p>
-    <button class="mb-4" @click="createNewPost">New Post</button>
+    <APICallButton class="mb-4" :api-call="createNewPost">
+      New Post
+    </APICallButton>
 
     <h1 class="mb-2 text-accent">Your Posts</h1>
     <table class="block w-full border-collapse overflow-x-auto">

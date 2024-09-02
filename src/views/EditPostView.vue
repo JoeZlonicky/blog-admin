@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { getPost } from '@/api/getPost';
+import { updatePostTitleAndContent } from '@/api/updatePostTitleAndContent';
+import APICallButton from '@/components/APICallButton.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { Post } from '@/types/Post';
 import { onMounted, ref, watch } from 'vue';
@@ -19,7 +21,7 @@ const didLastFetchSucceed = ref(false);
 
 async function updatePost() {
   const postId = parseInt(route.params.postId as string);
-  authStore.callWithAuthentication(async (authToken) => {
+  await authStore.callWithAuthentication(async (authToken) => {
     try {
       isFetching.value = true;
       post.value = await getPost(authToken, postId);
@@ -36,15 +38,26 @@ async function updatePost() {
 
 function discard() {
   if (post.value) {
-    currentTitle.value = post.value.title;
-    currentContent.value = post.value.content;
+    router.push(`/post/${post.value.id}`);
   }
 }
 
-function save() {
-  if (post.value) {
-    router.push(`/post/${post.value.id}`);
-  }
+async function save() {
+  await authStore.callWithAuthentication(async (authToken) => {
+    if (
+      post.value &&
+      currentTitle.value &&
+      currentContent.value !== undefined
+    ) {
+      await updatePostTitleAndContent(
+        authToken,
+        post.value.id,
+        currentTitle.value,
+        currentContent.value,
+      );
+      router.push(`/post/${post.value.id}`);
+    }
+  });
 }
 
 onMounted(async () => updatePost());
@@ -70,7 +83,7 @@ watch(
 
       <span class="mx-auto mb-4 flex w-fit gap-2">
         <button @click="discard">Discard Changes</button>
-        <button @click="save">Save Changes</button>
+        <APICallButton :api-call="save">Save Changes</APICallButton>
       </span>
     </template>
   </div>

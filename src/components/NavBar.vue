@@ -1,12 +1,13 @@
 <script setup lang="ts">
+import APICallButton from './APICallButton.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { storeToRefs } from 'pinia';
 
 const authStore = useAuthStore();
 const { needsAuthentication } = storeToRefs(authStore);
 
-function logOut() {
-  authStore.logOut();
+async function logOut() {
+  await authStore.logOut();
   window.location.href = '/'; // Force refresh even if on home page
 }
 </script>
@@ -24,12 +25,12 @@ function logOut() {
         &larr; Dashboard
       </RouterLink>
     </nav>
-    <button
+    <APICallButton
       v-show="!needsAuthentication"
       class="mx-4 my-auto max-h-12 rounded-md text-lg"
-      @click="logOut"
+      :api-call="logOut"
     >
       Log out
-    </button>
+    </APICallButton>
   </header>
 </template>

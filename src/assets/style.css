@@ -19,8 +19,12 @@ button {
   @apply bg-input-bg px-4 py-2 font-bold;
 }
 
-button:hover:not(:active) {
+button:hover:not(:active):not(:disabled) {
   @apply bg-input-bg-highlight;
+}
+
+button:disabled {
+  @apply bg-disabled;
 }
 
 input[type='checkbox'] {

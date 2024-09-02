@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import APICallButton from './APICallButton.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
@@ -12,7 +13,7 @@ const { needsAuthentication } = storeToRefs(authStore);
 
 const dialog = ref<HTMLElement | null>(null);
 
-async function onSubmitForm() {
+async function submitForm() {
   try {
     await authStore.attemptLogIn(
       username.value as string,
@@ -35,11 +36,11 @@ async function onSubmitForm() {
   <div
     v-show="needsAuthentication"
     ref="dialog"
-    class="bg-dim-backdrop fixed inset-0"
+    class="fixed inset-0 bg-dim-backdrop"
   >
     <form
       class="mx-auto mt-16 flex max-w-md flex-col items-center gap-4 border-2 border-accent bg-primary p-8"
-      @submit.prevent="onSubmitForm"
+      @submit.prevent
     >
       <h1 class="text-center font-bold text-accent">Log In</h1>
 
@@ -52,8 +53,10 @@ async function onSubmitForm() {
         <label for="password">Password:</label>
         <input id="password" v-model="password" type="password" required />
       </div>
-      <p v-if="errorMessage" class="font-bold">{{ errorMessage }}</p>
-      <button class="mx-auto mt-2 block" type="submit">Log In</button>
+      <p v-if="errorMessage" class="font-bold">Error: {{ errorMessage }}</p>
+      <APICallButton class="mx-auto mt-2 block" :api-call="submitForm"
+        >Log In</APICallButton
+      >
     </form>
   </div>
 </template>
